@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Yezhora — Pink Royal</title>
+
+<!-- Fonts: Great Vibes (script), Playfair Display (serif), Lora (body) -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@600;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    /* Pinky royal palette */
+    --blush: #ffeef0;
+    --rose: #e27a8d;
+    --deep-rose: #b2465f;
+    --champagne: #f2d6a9;
+    --gold: #e5b84a;
+    --ivory: #fffaf8;
+    --text: #3a2d2d;
+    --glass: rgba(255,255,255,0.65);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Lora', serif;
+    background: linear-gradient(180deg, var(--blush) 0%, #ffe6ec 40%, #fffaf8 100%);
+    color:var(--text);
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* ===== Scrollable background mural (very tall) ===== */
+  .mural{
+    position:fixed; left:0; top:0; width:100%; height:300vh; /* 3x height for scroll reveal */
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.15), transparent 15%),
+      linear-gradient(180deg, rgba(255,240,243,0.6) 0%, rgba(255,230,236,0.4) 50%, rgba(246,245,246,0.6) 100%);
+    z-index:-3;
+    pointer-events:none;
+  }
+
+  /* Pillars: tall subtle vertical bars that extend with scroll */
+  .pillar-left, .pillar-right{
+    position:fixed; top:0; width:80px; height:300vh; z-index:-2; pointer-events:none;
+    filter: blur(8px); opacity:0.06;
+  }
+  .pillar-left{left:0; background: linear-gradient(180deg, #ffdfe6 0%, #f7d6da 50%, #e7c0c9 100%);}
+  .pillar-right{right:0; background: linear-gradient(180deg, #fff0e0 0%, #fbe8d0 50%, #f6e0c6 100%);}
+
+  /* Sky / cloud shapes that stretch across scroll height */
+  .cloud-strip{
+    position:fixed; top:10vh; left:-10%; width:120%; height:200vh; z-index:-2; pointer-events:none;
+    background:
+      radial-gradient(ellipse at 20% 15%, rgba(255,255,255,0.55) 0%, transparent 20%),
+      radial-gradient(ellipse at 75% 35%, rgba(255,250,240,0.45) 0%, transparent 22%);
+    transform: translateZ(0);
+    opacity:0.6;
+  }
+
+  /* Yaazh motif repeated down scroll */
+  .yaazh-motif{
+    position:fixed; left:6%; top:8vh; width:140px; height:300vh; z-index:-1; pointer-events:none;
+    opacity:0.10;
+  }
+
+  /* sparkles: generated in DOM for more random placement */
+  .sparkle {
+    position:fixed;
+    width:6px; height:6px; background:var(--gold); border-radius:50%;
+    box-shadow: 0 0 8px rgba(229,184,74,0.9);
+    pointer-events:none; opacity:0.95;
+    transform: translate3d(0,0,0);
+    will-change: transform, opacity;
+  }
+
+  /* ===== Page frame & header (content sits above mural) ===== */
+  .site {
+    position:relative;
+    max-width:1100px;
+    margin:0 auto;
+    padding:40px 22px 160px; /* bottom padding to allow scrolling */
+    z-index:2;
+  }
+
+  header.site-header{
+    text-align:center;
+    margin-top:18vh;
+    margin-bottom:18px;
+    padding:18px 20px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.35));
+    border-radius:18px;
+    box-shadow: 0 6px 30px rgba(178, 70, 95, 0.06);
+    backdrop-filter: blur(4px);
+    border:1px solid rgba(255,255,255,0.6);
+  }
+
+  .brand-title{
+    font-family:'Great Vibes', cursive;
+    font-size:4.6rem;
+    color:var(--deep-rose);
+    line-height:1;
+    letter-spacing:1px;
+    margin-bottom:6px;
+    text-shadow: 0 2px 0 rgba(255,255,255,0.45);
+  }
+
+  .brand-sub{
+    font-family:'Playfair Display', serif;
+    color:var(--gold);
+    font-style:italic;
+    font-size:1.05rem;
+    opacity:0.95;
+  }
+
+  /* ===== Jewel navigation (like framed buttons) ===== */
+  nav.jewel-nav{
+    display:flex; gap:18px; justify-content:center; margin:28px 0 40px;
+    z-index:5;
+  }
+
+  nav.jewel-nav a{
+    display:inline-block;
+    padding:12px 22px;
+    border-radius:12px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
+    border: 2px solid rgba(255,255,255,0.6);
+    box-shadow: 0 6px 0 rgba(178,70,95,0.18);
+    color:var(--deep-rose);
+    font-weight:700;
+    font-family:'Playfair Display', serif;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    cursor:pointer;
+    transition: transform .18s, box-shadow .18s, background .18s;
+    position:relative;
+    overflow:hidden;
+  }
+
+  nav.jewel-nav a::after{
+    content:'';
+    position:absolute; inset:0;
+    background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    pointer-events:none;
+  }
+
+  nav.jewel-nav a:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 10px 0 rgba(178,70,95,0.2);
+    background: linear-gradient(180deg, rgba(237,216,190,0.95), rgba(255,245,238,0.9));
+    color:var(--deep-rose);
+  }
+
+  /* ===== Content / Posts area ===== */
+  .posts {
+    margin: 20px auto 60px;
+    display:flex;
+    flex-direction:column;
+    gap:36px;
+  }
+
+  /* Each post looks like an ornate letter card */
+  .post {
+    position:relative;
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,250,0.96));
+    border-radius:18px;
+    padding:28px;
+    box-shadow: 0 18px 40px rgba(160,90,120,0.07);
+    border: 1px solid rgba(255,255,255,0.7);
+    min-height:160px;
+    overflow:hidden;
+    cursor:pointer;
+  }
+
+  .post .meta { color: var(--deep-rose); font-family:'Playfair Display',serif; font-weight:700; letter-spacing:0.8px; margin-bottom:8px;}
+  .post .title { font-size:1.6rem; font-family:'Playfair Display',serif; color:var(--deep-rose); margin-bottom:8px; }
+  .post .excerpt { color:#5a4246; font-size:1rem; opacity:0.95; }
+
+  /* envelope overlay (the opening letter effect) */
+  .envelope {
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(180deg, rgba(210,165,170,0.95), rgba(255,240,242,0.9));
+    z-index:6;
+    transform-origin: top center;
+    transition: transform .9s cubic-bezier(.22,.9,.3,1), opacity .6s;
+    border-radius:18px;
+    box-shadow: 0 18px 40px rgba(178,70,95,0.12);
+  }
+
+  /* envelope flap (top triangular fold) */
+  .envelope .flap {
+    width:86%;
+    height:48%;
+    position:absolute;
+    top:-6%;
+    left:7%;
+    transform-origin: top center;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,247,247,0.6));
+    border-bottom-left-radius:44px;
+    border-bottom-right-radius:44px;
+    border:1px solid rgba(255,255,255,0.6);
+    box-shadow: 0 6px 30px rgba(0,0,0,0.04);
+  }
+  /* closed state */
+  .envelope.closed { transform: translateY(0) scaleY(1); opacity:1 }
+  /* opened state */
+  .envelope.open { transform: translateY(-6px) scaleY(0.005); opacity:0; pointer-events:none; }
+
+  /* inner content container revealed after envelope opens */
+  .postContent {
+    opacity:0; transform: translateY(10px);
+    transition: opacity .6s .28s, transform .6s .28s;
+  }
+  .post.open .postContent { opacity:1; transform: translateY(0); }
+
+  /* decorative corner jewel */
+  .jewel {
+    position:absolute; right:18px; top:18px; width:42px; height:42px; border-radius:10px;
+    background: linear-gradient(180deg, #fff7e7, #f9e7d2);
+    border: 2px solid rgba(229,184,74,0.4);
+    box-shadow: 0 6px 18px rgba(178,70,95,0.08);
+    display:flex;align-items:center;justify-content:center;color:var(--deep-rose);
+    font-weight:700;font-family:'Playfair Display',serif;
+  }
+
+  /* footer */
+  footer.site-footer{
+    margin-top:80px;
+    padding:40px;
+    text-align:center;
+    color:#7a4a53;
+    opacity:0.95;
+  }
+
+  /* responsive */
+  @media (max-width:900px){
+    .brand-title{font-size:3.4rem}
+    .site{padding:30px 18px 140px}
+    .pillar-left, .pillar-right{width:56px}
+  }
+
+  @media (max-width:520px){
+    .brand-title{font-size:2.8rem}
+    nav.jewel-nav{gap:10px; flex-wrap:wrap}
+    nav.jewel-nav a{padding:10px 12px; font-size:0.86rem}
+  }
+  /* === Decorative permanent shapes === */
+  .shape-circle {
+    position: fixed;
+    top: 30vh; left: 12%;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffe37a, #e3b23c);
+    opacity: 0.35;
+    z-index: -2;
+    pointer-events: none;
+  }
+
+  .shape-triangle {
+    position: fixed;
+    bottom: 15vh; right: 10%;
+    width: 0; height: 0;
+    border-left: 90px solid transparent;
+    border-right: 90px solid transparent;
+    border-bottom: 150px solid #5B9BD5; /* Cerulean Blue */
+    opacity: 0.25;
+    z-index: -2;
+    pointer-events: none;
+    transform: rotate(-12deg);
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- Mural & decorative layers (tall so scrolling reveals them) -->
+  <div class="mural"></div>
+  <div class="pillar-left"></div>
+  <div class="pillar-right"></div>
+  <div class="cloud-strip"></div>
+  <!-- Permanent shapes (geometric motifs) -->
+  <div class="shape-circle"></div>
+  <div class="shape-triangle"></div>
+
+
+  <!-- Repeated Yaazh motif (SVG) placed fixed and extended in height -->
+  <svg class="yaazh-motif" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="rgba(229,184,74,0.14)" stroke-width="3">
+      <path d="M40,380 C40,300 60,240 100,120 C140,240 160,300 160,380" />
+      <path d="M76,140 C86,120 110,120 120,140" stroke-width="2"/>
+      <!-- stylized strings -->
+      <path d="M98,120 L98,360" stroke-opacity="0.12"/>
+      <path d="M104,120 L104,360" stroke-opacity="0.08"/>
+    </g>
+  </svg>
+
+  <!-- Sparkles (will be positioned & animated by JS) -->
+  <!-- container not needed; sparkles are placed absolutely -->
+
+  <div class="site">
+    <header class="site-header" role="banner">
+      <div class="brand-title">Yezhora</div>
+      <div class="brand-sub">a pink royal diary of drifting thoughts</div>
+    </header>
+
+    <nav class="jewel-nav" role="navigation" aria-label="Main navigation">
+      <a id="nav-home">Home</a>
+      <a id="nav-about">About</a>
+      <a id="nav-blog">Blog</a>
+      <a id="nav-contact">Contact</a>
+    </nav>
+
+    <!-- POSTS: leave these empty or add headings and paragraphs later -->
+    <main class="posts" id="posts">
+      <!-- Post 1 -->
+      <article class="post" data-post-id="1" aria-label="Post 1">
+        <div class="jewel">✦</div>
+
+        <!-- envelope overlay (closed initially) -->
+        <div class="envelope closed" aria-hidden="true">
+          <div class="flap"></div>
+        </div>
+
+        <!-- actual content you will add later -->
+        <div class="postContent" aria-hidden="false">
+          <div class="meta">Category · Date</div>
+          <div class="title">Post Title</div>
+          <div class="excerpt">A short excerpt goes here. Replace with your content.</div>
+        </div>
+      </article>
+
+      <!-- Post 2 -->
+      <article class="post" data-post-id="2" aria-label="Post 2">
+        <div class="jewel">✦</div>
+        <div class="envelope closed" aria-hidden="true"><div class="flap"></div></div>
+        <div class="postContent">
+          <div class="meta">Category · Date</div>
+          <div class="title">Second Post</div>
+          <div class="excerpt">Another short excerpt — you will paste your story here later.</div>
+        </div>
+      </article>
+
+      <!-- Post 3 -->
+      <article class="post" data-post-id="3" aria-label="Post 3">
+        <div class="jewel">✦</div>
+        <div class="envelope closed" aria-hidden="true"><div class="flap"></div></div>
+        <div class="postContent">
+          <div class="meta">Category · Date</div>
+          <div class="title">Third Post</div>
+          <div class="excerpt">Empty placeholder — add image tags, paragraphs and quotes below.</div>
+        </div>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      © 2025 Yezhora • crafted in blush & gold • <a href="#" style="color:var(--deep-rose); text-decoration:underline">Instagram</a>
+    </footer>
+  </div>
+
+<script>
+/* ----------------------------
+  1) Sparkles generator (random positions + gentle float)
+-------------------------------*/
+const createSparkle = (left, top, delay=0) => {
+  const s = document.createElement('div');
+  s.className = 'sparkle';
+  s.style.left = left + 'px';
+  s.style.top = top + 'px';
+  s.style.opacity = (0.6 + Math.random()*0.6).toString();
+  s.style.transform = 'translateY(0px)';
+  s.style.animationDuration = (4 + Math.random()*4) + 's';
+  s.style.animationDelay = delay + 's';
+  document.body.appendChild(s);
+  // subtle horizontal float
+  s.animate([
+    { transform: 'translate3d(0,0,0)', opacity: s.style.opacity },
+    { transform: 'translate3d(' + (Math.random()*40 - 20) + 'px,-60px,0)', opacity: 0.6 },
+    { transform: 'translate3d(0,0,0)', opacity: s.style.opacity }
+  ], {
+    duration: (5000 + Math.random()*4000),
+    iterations: Infinity,
+    easing: 'ease-in-out',
+    delay: delay*1000
+  });
+  return s;
+};
+
+// create a handful of sparkles across the screen
+const ww = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+const wh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+for (let i=0;i<12;i++){
+  createSparkle( Math.random() * ww, Math.random() * wh * 0.8, Math.random()*2 );
+}
+
+/* ----------------------------
+  2) Letter / envelope opening interaction for posts
+-------------------------------*/
+document.querySelectorAll('.post').forEach(post=>{
+  const envelope = post.querySelector('.envelope');
+  const content = post.querySelector('.postContent');
+
+  // click toggles open
+  post.addEventListener('click', (e)=>{
+    // avoid clicks on links if you add later
+    if (post.classList.contains('open')){
+      // close
+      envelope.classList.remove('open');
+      envelope.classList.add('closed');
+      post.classList.remove('open');
+    } else {
+      // open envelope animation
+      envelope.classList.remove('closed');
+      envelope.classList.add('open');
+      // reveal content
+      post.classList.add('open');
+      // scroll slightly to keep the post visible
+      setTimeout(()=> post.scrollIntoView({behavior:'smooth', block:'center'}), 160);
+    }
+  });
+});
+
+/* ----------------------------
+  3) Simple nav scroll helpers (single page sections)
+-------------------------------*/
+document.getElementById('nav-home').addEventListener('click', ()=> window.scrollTo({top:0, behavior:'smooth'}));
+document.getElementById('nav-about').addEventListener('click', ()=>{
+  // about section is second post for now (you can add a real section)
+  const node = document.querySelector('.post:nth-child(2)');
+  node.scrollIntoView({behavior:'smooth', block:'center'});
+});
+document.getElementById('nav-blog').addEventListener('click', ()=>{
+  const node = document.querySelector('.posts');
+  node.scrollIntoView({behavior:'smooth', block:'start'});
+});
+document.getElementById('nav-contact').addEventListener('click', ()=>{
+  window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'});
+});
+</script>
+</body>
+</html>
